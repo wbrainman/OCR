@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OCR2</string>
+    <string name="title_activity_ocr">OCRActivity</string>
+</resources>
