@@ -20,17 +20,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".OCRActivity"></activity>
+        <activity android:name=".OCRActivity" />
 
         <provider
-            android:authorities="com.example.bo.ocr2.fileprovider"
             android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.bo.ocr2.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service
+            android:name=".service.OcrService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

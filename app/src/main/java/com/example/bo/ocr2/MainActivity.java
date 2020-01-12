@@ -2,8 +2,10 @@ package com.example.bo.ocr2;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,6 +16,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.IBinder;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -31,6 +34,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.example.bo.ocr2.service.OcrService;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.BufferedReader;
@@ -52,10 +56,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private Bitmap mBitmap;
     private Uri imageUri;
-
-    private static final String DATAPATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "tesserart";
-    private static final String DEFAULT_LANGUAGE = "chi_sim";
-
     private static final String[] permissions = new String[] {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -63,6 +63,30 @@ public class MainActivity extends AppCompatActivity {
     private List<String> permissionList = new ArrayList<>();
     private static final int CHOOSE_PHOTO = 1;
     private static final int TAKE_PHOTO = 2;
+    private OcrService.OcrBinder ocrBinder;
+    private OcrService ocrService;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ocrBinder = (OcrService.OcrBinder) service;
+            ocrService = ocrBinder.getService();
+            ocrService.setOcrListener(new OcrListener() {
+                @Override
+                public void onOcrResult(String result) {
+                    Log.d(TAG, "onOcrResult: tid = " + Thread.currentThread().getId());
+                    Log.d(TAG, "onOcrResult: result = " + result);
+
+                }
+            });
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,11 +101,6 @@ public class MainActivity extends AppCompatActivity {
         btnLoad.setOnClickListener(clickListener);
         imageView = (ImageView) findViewById(R.id.image);
 
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inSampleSize = 2;
-//        bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.test, options);
-        mBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.test);
-        Log.d(TAG, "onCreate: size of bitmap is " + mBitmap.getByteCount());
         Glide.with(this).load(R.drawable.test).into(imageView);
 
         for(String permission:permissions) {
@@ -95,6 +114,11 @@ public class MainActivity extends AppCompatActivity {
         else {
             // TODO
         }
+
+        Intent intent = new Intent(this, OcrService.class);
+        startService(intent);
+        Intent bindIntent = new Intent(this, OcrService.class);
+        bindService(bindIntent, connection, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -127,7 +151,9 @@ public class MainActivity extends AppCompatActivity {
                     takePhoto();
                     break;
                 case R.id.export:
-                    startOCR();
+                    Intent intent = new Intent(MainActivity.this, OCRActivity.class);
+                    startActivity(intent);
+                    ocrService.startOCR();
                     break;
                 case R.id.load:
                     openAlbum();
@@ -144,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Log.d(TAG, "run: OCR start");
                 TessBaseAPI tessBaseAPI = new TessBaseAPI();
-                tessBaseAPI.init(DATAPATH, DEFAULT_LANGUAGE);
+//                tessBaseAPI.init(DATAPATH, DEFAULT_LANGUAGE);
                 Log.d(TAG, "run: OCR init");
                 tessBaseAPI.setImage(mBitmap);
                 Log.d(TAG, "run: OCR  setImage");
