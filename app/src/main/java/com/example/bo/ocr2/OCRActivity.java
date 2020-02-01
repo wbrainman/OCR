@@ -38,8 +38,8 @@ public class OCRActivity extends AppCompatActivity {
                             if(progressBar.getVisibility() == View.VISIBLE) {
                                 progressBar.setVisibility(View.GONE);
                             }
-                            Log.d(TAG, getLocalClassName() + "run, onOcrResult: tid = " + Thread.currentThread().getId());
-                            Log.d(TAG, getLocalClassName() + "run, onOcrResult: result = " + result);
+//                            Log.d(TAG, getLocalClassName() + "run, onOcrResult: tid = " + Thread.currentThread().getId());
+//                            Log.d(TAG, getLocalClassName() + "run, onOcrResult: result = " + result);
                             textView.setText(result);
                         }
                     });
@@ -65,11 +65,6 @@ public class OCRActivity extends AppCompatActivity {
         if(progressBar.getVisibility() == View.GONE) {
            progressBar.setVisibility(View.VISIBLE);
         }
-
-//        Intent intent = getIntent();
-//        String data = intent.getStringExtra("ocr_data");
-//        Log.d(TAG, "onCreate: data is " + data);
-//        textView.setText(data);
 
         Intent bindIntent = new Intent(this, OcrService.class);
         bindService(bindIntent, connection, BIND_AUTO_CREATE);
@@ -111,6 +106,7 @@ public class OCRActivity extends AppCompatActivity {
         if(progressBar.getVisibility() == View.VISIBLE) {
             progressBar.setVisibility(View.GONE);
         }
+        unbindService(connection);
         Log.d(TAG, "onDestroy: " + getLocalClassName());
     }
 }

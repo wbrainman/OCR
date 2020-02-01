@@ -38,6 +38,7 @@ import com.example.bo.ocr2.service.OcrService;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.export:
                     Intent intent = new Intent(MainActivity.this, OCRActivity.class);
                     startActivity(intent);
-                    ocrService.startOCR();
+                    ocrService.startOCR(mBitmap);
                     break;
                 case R.id.load:
                     openAlbum();
@@ -163,34 +164,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    private void startOCR() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run: OCR start");
-                TessBaseAPI tessBaseAPI = new TessBaseAPI();
-//                tessBaseAPI.init(DATAPATH, DEFAULT_LANGUAGE);
-                Log.d(TAG, "run: OCR init");
-                tessBaseAPI.setImage(mBitmap);
-                Log.d(TAG, "run: OCR  setImage");
-                final String result = tessBaseAPI.getUTF8Text();
-                Log.d(TAG, "run: OCR result = " + result);
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(MainActivity.this, OCRActivity.class);
-                        intent.putExtra("ocr_data", result);
-                        startActivity(intent);
-                    }
-                });
-
-                tessBaseAPI.end();
-                Log.d(TAG, "run: OCR end");
-            }
-        }).start();
-    }
 
     private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
@@ -277,11 +250,11 @@ public class MainActivity extends AppCompatActivity {
     private void displayImage(final String imagePath) {
         if(imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            Glide.with(this)
-                    .load(imagePath)
-//                    .bitmapTransform(new GrayscaleTransformation(this))
-                    .into(imageView);
             mBitmap = bitmap;
+//            Glide.with(this)
+//                    .load(imagePath)
+//                    .bitmapTransform(new GrayscaleTransformation(this))
+//                    .into(imageView);
 //            new Thread(new Runnable() {
 //                @Override
 //                public void run() {
@@ -294,6 +267,14 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                }
 //            });
+            Log.d(TAG, "displayImage: org bitmap w = " + mBitmap.getWidth() + " h = " + mBitmap.getHeight());
+            Bitmap bmp = ocrService.convertToBMW(mBitmap,400,400, 115);
+            mBitmap = bmp;
+            Log.d(TAG, "displayImage: resize bitmap w = " + bmp.getWidth() + " h = " + bmp.getHeight());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] bytes=baos.toByteArray();
+            Glide.with(this).load(bytes).into(imageView);
         }
         else {
             Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();
@@ -329,4 +310,9 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, TAKE_PHOTO);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+    }
 }
