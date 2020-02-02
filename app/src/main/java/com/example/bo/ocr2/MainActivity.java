@@ -251,14 +251,20 @@ public class MainActivity extends AppCompatActivity {
         if(imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
             Log.d(TAG, "displayImage: org bitmap w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
-            Bitmap bmp = ocrService.convertToBMW(bitmap,400,400, 115);
-            bmp = ocrService.RemoveNoise(bmp);
+            /* rescaling */
+            Bitmap bmp = ocrService.rescaling(bitmap, 400, 400);
+            /* binarisation */
+            bmp = ocrService.binarisation(bmp,115);
+            /* removeNoise */
+            bmp = ocrService.removeNoise(bmp);
+
             mBitmap = bmp;
             Log.d(TAG, "displayImage: resize bitmap w = " + bmp.getWidth() + " h = " + bmp.getHeight());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
             byte[] bytes=baos.toByteArray();
             Glide.with(this).load(bytes).into(imageView);
+
         }
         else {
             Toast.makeText(this, "failed to get image", Toast.LENGTH_SHORT).show();

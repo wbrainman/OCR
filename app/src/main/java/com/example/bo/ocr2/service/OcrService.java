@@ -88,7 +88,7 @@ public class OcrService extends Service {
      *            二值化的阀值
      * @return
      */
-    public  Bitmap convertToBMW(Bitmap bmp, int w, int h,int tmp) {
+    public  Bitmap binarisation(Bitmap bmp,int tmp) {
         int width = bmp.getWidth(); // 获取位图的宽
         int height = bmp.getHeight(); // 获取位图的高
         int[] pixels = new int[width * height]; // 通过位图的大小创建像素点数组
@@ -132,11 +132,15 @@ public class OcrService extends Service {
         Bitmap newBmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         // 设置图片数据
         newBmp.setPixels(pixels, 0, width, 0, 0, width, height);
-        Bitmap resizeBmp = ThumbnailUtils.extractThumbnail(newBmp, w, h);
+        return  newBmp;
+    }
+
+    public Bitmap rescaling(Bitmap bitmap, int w, int h) {
+        Bitmap resizeBmp = ThumbnailUtils.extractThumbnail(bitmap, w, h);
         return resizeBmp;
     }
 
-    public Bitmap RemoveNoise(Bitmap bitmap) {
+    public Bitmap removeNoise(Bitmap bitmap) {
         for (int x = 0; x < bitmap.getWidth(); x ++) {
             for (int y = 0; y < bitmap.getHeight(); y ++) {
                 int pixel = bitmap.getPixel(x,y);
