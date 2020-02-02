@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
         if(imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
             Log.d(TAG, "displayImage: org bitmap w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
-            Bitmap bmp = ocrService.convertToBMW(bitmap,400,400, 120);
+            Bitmap bmp = ocrService.convertToBMW(bitmap,400,400, 115);
             bmp = ocrService.RemoveNoise(bmp);
             mBitmap = bmp;
             Log.d(TAG, "displayImage: resize bitmap w = " + bmp.getWidth() + " h = " + bmp.getHeight());
