@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.ThumbnailUtils;
 import android.os.Binder;
 import android.os.Environment;
@@ -133,6 +134,33 @@ public class OcrService extends Service {
         newBmp.setPixels(pixels, 0, width, 0, 0, width, height);
         Bitmap resizeBmp = ThumbnailUtils.extractThumbnail(newBmp, w, h);
         return resizeBmp;
+    }
+
+    public Bitmap RemoveNoise(Bitmap bitmap) {
+        for (int x = 0; x < bitmap.getWidth(); x ++) {
+            for (int y = 0; y < bitmap.getHeight(); y ++) {
+                int pixel = bitmap.getPixel(x,y);
+                int R = Color.red(pixel);
+                int G = Color.green(pixel);
+                int B = Color.blue(pixel);
+                if(R < 162 && G < 162 && B < 162) {
+                   bitmap.setPixel(x,y,Color.BLACK);
+                }
+            }
+        }
+
+        for (int x = 0; x < bitmap.getWidth(); x ++) {
+            for (int y = 0; y < bitmap.getHeight(); y ++) {
+                int pixel = bitmap.getPixel(x,y);
+                int R = Color.red(pixel);
+                int G = Color.green(pixel);
+                int B = Color.blue(pixel);
+                if(R > 162 && G > 162 && B > 162) {
+                    bitmap.setPixel(x,y,Color.WHITE);
+                }
+            }
+        }
+        return bitmap;
     }
 
 }

@@ -250,25 +250,9 @@ public class MainActivity extends AppCompatActivity {
     private void displayImage(final String imagePath) {
         if(imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            mBitmap = bitmap;
-//            Glide.with(this)
-//                    .load(imagePath)
-//                    .bitmapTransform(new GrayscaleTransformation(this))
-//                    .into(imageView);
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        mBitmap = Glide.with(getApplicationContext()).load(imagePath).asBitmap().into(400,400).get();
-//                    }catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }catch (ExecutionException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-            Log.d(TAG, "displayImage: org bitmap w = " + mBitmap.getWidth() + " h = " + mBitmap.getHeight());
-            Bitmap bmp = ocrService.convertToBMW(mBitmap,400,400, 115);
+            Log.d(TAG, "displayImage: org bitmap w = " + bitmap.getWidth() + " h = " + bitmap.getHeight());
+            Bitmap bmp = ocrService.convertToBMW(bitmap,400,400, 120);
+            bmp = ocrService.RemoveNoise(bmp);
             mBitmap = bmp;
             Log.d(TAG, "displayImage: resize bitmap w = " + bmp.getWidth() + " h = " + bmp.getHeight());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
